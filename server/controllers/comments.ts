@@ -49,7 +49,6 @@ export const searchComments = async (req: Request, res: Response) => {
           ],
         }
       : {}
-    console.log(filter.$or?.[1])
 
     const total = await commentsCollection.countDocuments(filter)
     const data = await commentsCollection

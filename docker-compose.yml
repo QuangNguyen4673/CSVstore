@@ -4,11 +4,12 @@ services:
   client:
     build: ./client
     ports:
-      - '5173:5173' # Adjust to your React port
+      - '5173:5173'
+    command: pnpm dev --host
     depends_on:
       - server
     environment:
-      - VITE_API_URL=http://localhost:3000
+      - VITE_API_URL=http://localhost:8000/comments
     volumes:
       - ./client:/app
       - /app/node_modules
@@ -16,7 +17,7 @@ services:
   server:
     build: ./server
     ports:
-      - '3000:3000'
+      - '8000:8000'
     depends_on:
       - mongo
     environment:

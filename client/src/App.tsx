@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/pagination"
 import { getPaginationRange } from './utils'
 import { SearchBar } from './components/SearchInput'
-import debounce from 'debounce'
 
 const apiUrl = import.meta.env.VITE_API_URL
 
