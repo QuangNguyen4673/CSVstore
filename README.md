@@ -15,7 +15,8 @@ This project is a full-stack application built with:
 - 🗃️ CSV upload & validation (Zod)
 - 📦 RESTful API for CRUD operations
 
-🛠️ Run the project
+🛠️ Run the project:
+
 docker-compose up --build
 
 This will:
