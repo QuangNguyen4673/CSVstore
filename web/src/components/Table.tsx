@@ -6,9 +6,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import type { Info } from "@/types";
+import type { Comment } from "@/types";
 
-export default function CSVTable({ infoItems }: { infoItems: Info[] }) {
+export default function CSVTable({ comments }: { comments: Comment[] }) {
   return (
     <Table>
       <TableHeader>
@@ -21,7 +21,7 @@ export default function CSVTable({ infoItems }: { infoItems: Info[] }) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {infoItems.map((item) => (
+        {comments.map((item) => (
           <TableRow key={item.id}>
             <TableCell>{item.postId}</TableCell>
             <TableCell>{item.id}</TableCell>

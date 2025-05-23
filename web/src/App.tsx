@@ -1,19 +1,35 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
 } from "@/components/ui/card"
 import './App.css'
-import { Toaster } from "sonner"
-
+import { toast, Toaster } from "sonner"
 import Table from './components/Table';
-import { infoItems } from './mockedData';
+import type { Comment } from './types'
+import axios from 'axios'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationEllipsis,
+  PaginationPrevious,
+} from "@/components/ui/pagination"
+import { getPaginationRange } from './utils'
+import { SearchBar } from './components/SearchInput'
+import debounce from 'debounce'
+
+const apiUrl = import.meta.env.VITE_API_URL
+
+const LIMIT = 10
 
 function App() {
   const [file, setFile] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [message, setMessage] = useState('');
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [params, setParams] = useState({ page: 1, totalPages: 1, query: '' });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
@@ -22,24 +38,47 @@ function App() {
   };
 
   const handleUpload = async () => {
-    if (!file) return alert("No file selected!");
+    if (!file) return toast("No file selected!");
 
     const formData = new FormData();
     formData.append('file', file);
 
     try {
-      const res = await fetch('http://localhost:5000/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const result = await res.json();
-      alert(`Upload success: ${JSON.stringify(result)}`);
+      await axios.post(`${apiUrl}/api/upload`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+      toast('File uploaded')
+      fetchComments()
     } catch (error) {
       console.error(error);
-      alert("Upload failed");
+      toast('Upload unsuccessfully')
     }
   };
+
+  const fetchComments = useCallback(
+    async () => {
+      const search = params.query ? `&q=${params.query}` : ''
+      try {
+        const res = await axios.get(`${apiUrl}?page=${params.page}&limit=${LIMIT}${search}`)
+        setComments(res.data.data)
+        setParams(prev => ({ ...prev, totalPages: res.data.totalPages }))
+      } catch (error) {
+        console.log(error);
+        toast('Get comments unsuccessfully')
+      }
+    },
+    [params.page, params.query],
+  )
+
+  const handleSearch = (val: string) => {
+    setParams(prev => ({ ...prev, query: val }))
+  }
+
+  useEffect(() => {
+    fetchComments()
+  }, [fetchComments])
 
   return (
     <>
@@ -57,17 +96,57 @@ function App() {
             {/*  TODO add cursor-pointer effect the whole input */}
             <Button
               onClick={handleUpload}
-              disabled={isUploading}
             >
-              {isUploading ? 'Uploading...' : 'Upload'}
+              Upload
             </Button>
-            {message && (
-              <p className="text-sm text-gray-700 bg-gray-100 p-2 rounded">{message}</p>
-            )}
           </div>
         </CardContent>
       </Card>
-      <Table infoItems={infoItems} />
+      <SearchBar value={params.query} onChange={handleSearch} />
+
+      {comments.length === 0 ? "No data" :
+        <>
+          <Table comments={comments} />
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  href="#"
+                  onClick={() => setParams(prev => ({ ...prev, page: Math.max(prev.page - 1, 1) }))}
+                  className={params.page === 1 ? "pointer-events-none opacity-50" : ""}
+                />
+              </PaginationItem>
+
+              {getPaginationRange(params.page, params.totalPages).map((item, index) => (
+                <PaginationItem key={index}>
+                  {item === "..." ? (
+                    <PaginationEllipsis />
+                  ) : (
+                    <PaginationLink
+                      href="#"
+                      isActive={item === params.page}
+                      onClick={() => setParams(prev => ({ ...prev, page: Number(item) }))}
+                    >
+                      {item}
+                    </PaginationLink>
+                  )}
+                </PaginationItem>
+              ))}
+
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  onClick={() => setParams(prev => ({
+                    ...prev,
+                    page: Math.min(prev.page + 1, prev.totalPages)
+                  }))}
+                  className={params.page === params.totalPages ? "pointer-events-none opacity-50" : ""}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </>
+      }
       <Toaster />
     </>
   )

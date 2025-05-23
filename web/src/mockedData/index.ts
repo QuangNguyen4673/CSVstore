@@ -1,6 +1,6 @@
-import type { Info } from '@/types'
+import type { Comment } from '@/types'
 
-export const infoItems: Info[] = [
+export const infoItems: Comment[] = [
   {
     postId: 1,
     id: 1,

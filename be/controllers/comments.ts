@@ -2,9 +2,9 @@ import { Request, Response } from 'express'
 import { zodCommentSchema as schema } from '../types/schema'
 import { commentsCollection } from '../db/mymongo'
 import { Comment } from '../types'
+import { parseBrokenCSVRow } from '../utils'
 import csv from 'csv-parser'
 import fs from 'fs'
-import { parseBrokenCSVRow } from '../utils'
 
 export const getComments = async (req: Request, res: Response) => {
   try {
@@ -29,6 +29,45 @@ export const getComments = async (req: Request, res: Response) => {
   } catch (err) {
     console.log(err)
     res.status(500).json({ error: 'Failed to fetch comments' })
+  }
+}
+
+export const searchComments = async (req: Request, res: Response) => {
+  try {
+    const search = req.query.q as string
+    const page = parseInt(req.query.page as string) || 1
+    const limit = parseInt(req.query.limit as string) || 10
+    const skip = (page - 1) * limit
+
+    // case-insensitive regex search on multiple fields
+    const filter = search
+      ? {
+          $or: [
+            { name: { $regex: search, $options: 'i' } },
+            { email: { $regex: search, $options: 'i' } },
+            { body: { $regex: search, $options: 'i' } },
+          ],
+        }
+      : {}
+    console.log(filter.$or?.[1])
+
+    const total = await commentsCollection.countDocuments(filter)
+    const data = await commentsCollection
+      .find(filter)
+      .skip(skip)
+      .limit(limit)
+      .toArray()
+
+    res.status(200).json({
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+      data,
+    })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'Failed to search comments' })
   }
 }
 
@@ -76,9 +115,16 @@ export const uploadCSV = async (req: Request, res: Response) => {
   const invalidRows: { index: number; errors: string[] }[] = []
 
   fs.createReadStream(filePath)
-    .pipe(csv())
+    .pipe(
+      csv({
+        skipLines: 0,
+        separator: ',',
+        mapHeaders: ({ header }) => header.trim().replace(/^"|"$/g, ''), // remove surrounding quotes
+        mapValues: ({ value }) => value.trim().replace(/^"|"$/g, ''), // remove quotes from values
+      })
+    )
     .on('data', data => {
-      rawRows.push(parseBrokenCSVRow(data))
+      rawRows.push(data)
     })
     .on('end', async () => {
       rawRows.forEach((row, index) => {
@@ -113,48 +159,4 @@ export const uploadCSV = async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Failed to process CSV' })
       }
     })
-}
-
-export const searchComments = async (req: Request, res: Response) => {
-  try {
-    const search = req.query.q as string
-    const page = parseInt(req.query.page as string) || 1
-    const limit = parseInt(req.query.limit as string) || 10
-    const skip = (page - 1) * limit
-
-    if (!search || typeof search !== 'string') {
-      return res
-        .status(400)
-        .json({ error: 'Missing or invalid search query (q)' })
-    }
-
-    // case-insensitive regex search on multiple fields
-    const filter = search
-      ? {
-          $or: [
-            { name: { $regex: search, $options: 'i' } },
-            { email: { $regex: search, $options: 'i' } },
-            { body: { $regex: search, $options: 'i' } },
-          ],
-        }
-      : {}
-
-    const total = await commentsCollection.countDocuments(filter)
-    const data = await commentsCollection
-      .find(filter)
-      .skip(skip)
-      .limit(limit)
-      .toArray()
-
-    res.status(200).json({
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-      data,
-    })
-  } catch (error) {
-    console.error(error)
-    res.status(500).json({ error: 'Failed to search comments' })
-  }
 }

@@ -13,7 +13,7 @@ const upload = multer({ dest: 'uploads/' })
 
 const router = express.Router()
 
-router.get('/', getComments)
+router.get('/', searchComments)
 
 router.post('/', createComment)
 
@@ -21,6 +21,6 @@ router.post('/bulk', createBatchComments)
 
 router.post('/api/upload', upload.single('file'), uploadCSV)
 
-router.get('/search', searchComments)
+// router.get('/search', searchComments)
 
 export default router
