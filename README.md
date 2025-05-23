@@ -20,13 +20,7 @@ Containerized using Docker Compose
 
 📦 RESTful API for CRUD operations
 
-STE
-├── client/ # React (Vite) frontend
-│ └── Dockerfile
-├── server/ # Express backend (TS or JS)
-│ └── Dockerfile
-├── docker-compose.yml
-└── README.md
+<pre> <code>```txt STE ├── client/ # React (Vite) frontend │ └── Dockerfile ├── server/ # Express backend (TS or JS) │ └── Dockerfile ├── docker-compose.yml └── README.md ```</code> </pre>
 
 🛠️ Setup
 
