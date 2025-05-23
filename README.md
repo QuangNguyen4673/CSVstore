@@ -18,8 +18,8 @@ This project is a full-stack application built with:
 🛠️ Setup
 
 1. Clone the Repository
-   git clone https://github.com/QuangNguyen4673/stengineering.git
-   cd STE
+   <code> git clone https://github.com/QuangNguyen4673/stengineering.git </code>
+   <code> cd STE <c/>ode>
 2. Start All Services
    docker-compose up --build
 
