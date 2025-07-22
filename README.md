@@ -1,5 +1,5 @@
 # CSV store app
-This app reads csv and store data under MongoDB for use
+This app reads csv and store the data under MongoDB for use
 
 🧩 Full Stack App with React, Express, and MongoDB
 This project is a full-stack application built with:
