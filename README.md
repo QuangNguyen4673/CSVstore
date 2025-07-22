@@ -26,3 +26,5 @@ This will:
 - Build and serve the React app on http://localhost:5173
 - Build and run the Express server on http://localhost:8000
 
+Note: use this csv for the happy case upload https://github.com/QuangNguyen4673/CSVstore/blob/main/client/public/data.csv
+
