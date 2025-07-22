@@ -23,5 +23,6 @@ docker-compose up --build
 This will:
 
 - Start the MongoDB container
-- Build and run the Express server on http://localhost:8000
 - Build and serve the React app on http://localhost:5173
+- Build and run the Express server on http://localhost:8000
+
