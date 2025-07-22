@@ -12,7 +12,7 @@ app.use(cors())
 app.use(express.json())
 
 app.get('/', (req: Request, res: Response) => {
-  res.send('hello post comment app')
+  res.send('CSV store server is running')
 })
 
 app.use('/comments', commentRoutes)

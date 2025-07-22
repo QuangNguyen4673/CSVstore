@@ -18,7 +18,7 @@ export const dbconnect = async () => {
   if (!commentsCollection) {
     try {
       await client.connect()
-      const database = client.db('STE')
+      const database = client.db('CSVstore')
       commentsCollection = database.collection('comments')
       console.log('✅ Connected to MongoDB')
     } catch (err) {

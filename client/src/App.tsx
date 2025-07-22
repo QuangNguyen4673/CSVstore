@@ -95,6 +95,7 @@ function App() {
             {/*  TODO add cursor-pointer effect the whole input */}
             <Button
               onClick={handleUpload}
+              disabled={!file}
             >
               Upload
             </Button>
